@@ -56,6 +56,8 @@ public class StudentController {
         try {
             Student updatedStudent = studentService.updateStudent(id, student);
             return new ResponseEntity<>(Result.success(updatedStudent), HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(Result.error(400, e.getMessage()), HttpStatus.BAD_REQUEST);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(Result.error(404, e.getMessage()), HttpStatus.NOT_FOUND);
         }
@@ -68,6 +70,8 @@ public class StudentController {
             studentService.deleteStudent(id);
             // 按文档要求，删除成功返回204 No Content（无响应体）
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(Result.error(400, e.getMessage()), HttpStatus.BAD_REQUEST);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(Result.error(404, e.getMessage()), HttpStatus.NOT_FOUND);
         }
