@@ -1,0 +1,24 @@
+# Java
+*.class
+*.jar
+*.war
+*.ear
+target/  # Maven/Gradle构建目录
+
+# IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Eclipse
+.settings/
+.project
+.classpath
+
+# 系统文件
+.DS_Store  # Mac
+Thumbs.db  # Windows
+
+# 日志
+logs/
