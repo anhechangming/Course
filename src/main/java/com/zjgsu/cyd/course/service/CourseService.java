@@ -5,9 +5,11 @@ import com.zjgsu.cyd.course.repository.CourseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.Comparator;
 
 @Service
 public class CourseService {
@@ -16,7 +18,10 @@ public class CourseService {
 
     // 1. 查询所有课程
     public List<Course> findAllCourses() {
-        return courseRepository.findAll();
+        List<Course> courses = courseRepository.findAll();
+        // 按 course.code 升序排序
+        Collections.sort(courses, Comparator.comparing(Course::getCode));
+        return courses;
     }
 
     // 2. 按ID查询课程（返回Optional，便于控制器处理不存在场景）
@@ -33,7 +38,7 @@ public class CourseService {
             // 抛出非法参数异常，说明异常原因
             throw new IllegalArgumentException("Course code already exists: " + course.getCode());
         }
-        // 自动生成课程ID（符合文档“系统生成唯一标识”要求）
+        // 自动生成课程ID（符合“系统生成唯一标识”要求）
         course.setId(UUID.randomUUID().toString().replace("-", ""));
         return courseRepository.save(course);
     }
