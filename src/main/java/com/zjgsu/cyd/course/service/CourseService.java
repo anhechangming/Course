@@ -18,7 +18,25 @@ public class CourseService {
     @Autowired
     private CourseRepository courseRepository;
 
+    // 检查课程时间冲突
+    private void checkTimeConflict(Course course, String excludeId) {
+        // 获取所有课程
+        List<Course> allCourses = courseRepository.findAll();
 
+        // 检查是否有时间冲突
+        boolean hasConflict = allCourses.stream()
+                .filter(existingCourse -> excludeId == null || !existingCourse.getId().equals(excludeId))
+                .anyMatch(existingCourse ->
+                        existingCourse.getInstructor().equals(course.getInstructor()) &&
+                                existingCourse.getSchedule().equals(course.getSchedule())
+                );
+
+        if (hasConflict) {
+            throw new IllegalArgumentException("Time conflict detected: Instructor '" +
+                    course.getInstructor() + "' already has a course at '" +
+                    course.getSchedule() + "'");
+        }
+    }
     // 分页查询课程（从内存数据查询，支持分页和排序）
     public List<Course> getCoursesByPage(PageQueryDTO pageQuery) {
         // 1. 获取所有课程数据
@@ -66,7 +84,8 @@ public class CourseService {
             // 抛出非法参数异常，说明异常原因
             throw new IllegalArgumentException("Course code already exists: " + course.getCode());
         }
-
+        // 检查时间冲突
+        checkTimeConflict(course, null);
         // 自动生成课程ID（符合“系统生成唯一标识”要求）
         course.setId(UUID.randomUUID().toString().replace("-", ""));
         return courseRepository.save(course);
@@ -87,6 +106,8 @@ public class CourseService {
         if (updatedCourse.getCapacity() <= 0) {
             throw new IllegalArgumentException("Course capacity must be positive: " + updatedCourse.getCapacity());
         }
+        // 检查时间冲突（排除自身）
+        checkTimeConflict(updatedCourse, id);
 
         // 更新合法字段并保存
         existingCourse.setTitle(updatedCourse.getTitle());
