@@ -4,6 +4,7 @@ package com.zjgsu.cyd.course.service;
 import com.zjgsu.cyd.course.model.Student;
 import com.zjgsu.cyd.course.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,6 +17,7 @@ public class StudentService {
 
     // 依赖选课Service，用于校验学生是否有选课记录
     @Autowired
+    @Lazy
     private EnrollmentService enrollmentService;
 
     // 1. 创建学生（自动生成ID和时间戳，校验学号唯一性）
@@ -79,18 +81,14 @@ public class StudentService {
     }
 
     // 6. 删除学生（校验是否有选课记录，有则禁止删除）
+    // 后续业务方法（如deleteStudent校验选课记录）保持不变
     public void deleteStudent(String id) {
-        // 1. 校验学生是否存在（不存在抛RuntimeException，对应Controller第74行404）
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Student not found with id: " + id));
-
-        // 2. 校验学生是否有选课记录（文档规则：有则禁止删除）{insert\_element\_6\_}
-        // 需依赖EnrollmentService查询该学生的选课记录
+        // 依赖EnrollmentService校验选课记录（符合文档规则）
         if (enrollmentService.existsByStudentId(student.getStudentId())) {
             throw new IllegalArgumentException("Cannot delete student: Student has active enrollments");
         }
-
-        // 无选课记录，执行删除
         studentRepository.deleteById(id);
     }
 }
