@@ -19,7 +19,7 @@
 **克隆仓库后直接在本地IDEA上运行**
 
 ```bash
-git clone https://github.com/anhechangming/Course.gitcd Course
+git clone https://github.com/anhechangming/Course.cd Course
 ```
 
 **访问地址**
