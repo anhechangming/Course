@@ -1,5 +1,6 @@
 package com.zjgsu.cyd.course.controller;
 
+import com.zjgsu.cyd.course.DTO.PageQueryDTO;
 import com.zjgsu.cyd.course.Response.Result;
 import com.zjgsu.cyd.course.model.Course;
 import com.zjgsu.cyd.course.service.CourseService;
@@ -23,7 +24,12 @@ import java.util.Map;
 public class CourseController {
     @Autowired
     private CourseService courseService;
-
+    // 分页查询
+    @GetMapping("/page")
+    public ResponseEntity<Result<List<Course>>> getCoursesByPage(PageQueryDTO pageQuery) {
+        List<Course> courses = courseService.getCoursesByPage(pageQuery);
+        return ResponseEntity.ok(Result.success(courses));
+    }
     // 1. 查询所有课程（GET /api/courses）
     @GetMapping
     public Result<List<Course>> getAllCourses() {

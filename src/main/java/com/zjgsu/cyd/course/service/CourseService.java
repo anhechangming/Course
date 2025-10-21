@@ -1,20 +1,48 @@
 package com.zjgsu.cyd.course.service;
 
+import com.zjgsu.cyd.course.DTO.PageQueryDTO;
 import com.zjgsu.cyd.course.model.Course;
 import com.zjgsu.cyd.course.repository.CourseRepository;
+import org.springdoc.core.converters.models.Pageable;
+import org.springdoc.core.converters.models.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.Comparator;
+
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class CourseService {
     @Autowired
     private CourseRepository courseRepository;
+
+
+    // 分页查询课程（从内存数据查询，支持分页和排序）
+    public List<Course> getCoursesByPage(PageQueryDTO pageQuery) {
+        // 1. 获取所有课程数据
+        List<Course> allCourses = this.findAllCourses(); // 复用已有方法获取排序后的数据
+
+        // 2. 处理分页参数
+        int pageNum = Math.max(pageQuery.getPageNum() - 1, 0); // 保证页码非负
+        int pageSize = pageQuery.getPageSize();
+
+        // 3. 计算分页索引
+        int totalElements = allCourses.size();
+        int startIndex = pageNum * pageSize;
+        int endIndex = Math.min(startIndex + pageSize, totalElements);
+
+        // 4. 如果起始索引超出范围，返回空列表
+        if (startIndex >= totalElements) {
+            return new ArrayList<>();
+        }
+
+        // 5. 返回当前页的数据列表
+        return new ArrayList<>(allCourses.subList(startIndex, endIndex));
+    }
+
+
 
     // 1. 查询所有课程
     public List<Course> findAllCourses() {
@@ -38,6 +66,7 @@ public class CourseService {
             // 抛出非法参数异常，说明异常原因
             throw new IllegalArgumentException("Course code already exists: " + course.getCode());
         }
+
         // 自动生成课程ID（符合“系统生成唯一标识”要求）
         course.setId(UUID.randomUUID().toString().replace("-", ""));
         return courseRepository.save(course);
@@ -76,4 +105,6 @@ public class CourseService {
         // 删除课程
         courseRepository.deleteById(id);
     }
+
+
 }
