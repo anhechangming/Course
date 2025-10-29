@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    # MySQL 数据库连接配置，需提前创建 course_db 数据库实例
+    url: jdbc:mysql://localhost:3306/course_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&characterEncoding=utf8mb4
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 123456
+    # HikariCP 连接池配置（Spring Boot 默认连接池，性能优化）
+    hikari:
+      maximum-pool-size: 15  # 最大连接数，根据服务器配置调整
+      minimum-idle: 5        # 最小空闲连接数，避免频繁创建连接
+      connection-timeout: 30000  # 连接超时时间（30秒）
+      idle-timeout: 600000       # 连接空闲超时时间（10分钟）
+      max-lifetime: 1800000      # 连接最大生命周期（30分钟）
+  jpa:
+    hibernate:
+      ddl-auto: validate  # 生产环境仅校验表结构，禁止自动修改表结构
+    show-sql: false       # 关闭SQL日志，避免泄露敏感数据
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect  # 适配MySQL 8.0的方言
+        jdbc.batch_size: 30  # 批量操作大小，提升写操作性能
+        order_inserts: true  # 优化批量插入顺序
+    open-in-view: false  # 关闭OpenSessionInView，遵循事务边界规范
+  sql:
+    init:
+      mode: never  # 生产环境禁止自动执行初始化脚本，需手动执行

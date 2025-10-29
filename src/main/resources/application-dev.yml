@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    # H2 内存数据库连接配置，无需提前创建数据库实例
+    url: jdbc:h2:mem:course_db;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa  # H2 默认用户名
+    password:     # H2 默认密码为空（可根据需求设置）
+  jpa:
+    hibernate:
+      ddl-auto: update  # 开发环境自动更新表结构（避免手动维护DDL）
+    show-sql: true      # 打印SQL日志，便于调试业务SQL逻辑
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect  # 适配H2数据库的方言
+        format_sql: true  # 格式化SQL日志，提升可读性
+    open-in-view: false  # 关闭OpenSessionInView，避免潜在性能问题
+  h2:
+    console:
+      enabled: true  # 开启H2控制台，用于可视化查看内存数据
+      path: /h2-console  # 控制台访问路径：http://localhost:8080/h2-console
+      settings:
+        web-allow-others: false  # 禁止外部网络访问（仅本地开发使用）
+  sql:
+    init:
+      mode: always  # 开发环境自动执行初始化脚本
+      schema-locations: classpath:db/dev/schema.sql  # 表结构初始化脚本路径
+      data-locations: classpath:db/dev/data.sql      # 测试数据初始化脚本路径

@@ -1,5 +1,7 @@
 package com.zjgsu.cyd.course.model;
 
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Embedded;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -9,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Embeddable
 public class ScheduleSlot {
     // 星期（如MONDAY、TUESDAY，需符合枚举规范）
     @NotBlank(message = "Day of week cannot be blank")
