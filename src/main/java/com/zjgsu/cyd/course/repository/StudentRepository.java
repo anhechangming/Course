@@ -1,51 +1,38 @@
 package com.zjgsu.cyd.course.repository;
 
 import com.zjgsu.cyd.course.model.Student;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-
 
 @Repository
-public class StudentRepository {
-    // 内存存储：key=学生ID（UUID），value=学生对象
-    private final Map<String, Student> students = new ConcurrentHashMap<>();
+// 继承 JpaRepository<实体类, 主键类型>，自动获得基础 CRUD 方法
+public interface StudentRepository extends JpaRepository<Student, String> {
 
-    // 1. 保存学生（新增/更新通用）
-    public Student save(Student student) {
-        students.put(student.getId(), student);
-        return student;
-    }
+    // 1. 保留原“按学号查询学生”方法（任务三要求：按学号唯一查询（{insert\_element\_0\_}））
+    Optional<Student> findByStudentId(String studentId);
 
-    // 2. 查询所有学生
-    public List<Student> findAll() {
-        return new ArrayList<>(students.values());
-    }
+    // 2. 新增：按邮箱查询学生（任务三要求：按邮箱唯一查询（{insert\_element\_1\_}），文档要求学生邮箱唯一（{insert\_element\_2\_}））
+    Optional<Student> findByEmail(String email);
 
-    // 3. 按ID（UUID）查询学生
-    public Optional<Student> findById(String id) {
-        return Optional.ofNullable(students.get(id));
-    }
+    // 3. 保留原“校验学号是否已存在”方法（任务三要求：判重检查（{insert\_element\_3\_}））
+    boolean existsByStudentId(String studentId);
 
-    // 4. 按学号（studentId）查询学生（用于唯一性校验、选课学生验证）
-    public Optional<Student> findByStudentId(String studentId) {
-        return students.values().stream()
-                .filter(student -> student.getStudentId().equals(studentId))
-                .findFirst();
-    }
+    // 4. 新增：校验邮箱是否已存在（任务三要求：判重检查（{insert\_element\_4\_}），文档要求学生邮箱唯一（{insert\_element\_5\_}））
+    boolean existsByEmail(String email);
 
-    // 5. 按ID删除学生
-    public void deleteById(String id) {
-        students.remove(id);
-    }
+    // 5. 新增：按专业筛选学生（任务三要求：按专业筛选（{insert\_element\_6\_}），支持分页）
+    Page<Student> findByMajor(String major, Pageable pageable);
 
-    // 6. 校验学号是否已存在（创建/更新学生时使用）
-    public boolean existsByStudentId(String studentId) {
-        return students.values().stream()
-                .anyMatch(student -> student.getStudentId().equals(studentId));
-    }
+    // 6. 新增：按年级筛选学生（任务三要求：按年级筛选（{insert\_element\_7\_}），支持分页）
+    Page<Student> findByGrade(Integer grade, Pageable pageable);
+
+    // 7. 新增：按专业+年级组合筛选学生（任务三扩展要求：多条件组合查询，适配复杂业务场景）
+    List<Student> findByMajorAndGrade(String major, Integer grade);
+
+    // 注：原内存实现中的 save/findAll/findById/deleteById 方法，JpaRepository 已默认实现，无需重复编写
 }

@@ -1,8 +1,11 @@
 package com.zjgsu.cyd.course.repository;
 
 
-
 import com.zjgsu.cyd.course.model.Enrollment;
+import com.zjgsu.cyd.course.model.EnrollmentStatus;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -13,54 +16,51 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Repository
-public class EnrollmentRepository {
-    // 内存存储：key=选课记录ID（UUID），value=选课对象
-    private final Map<String, Enrollment> enrollments = new ConcurrentHashMap<>();
+public interface EnrollmentRepository extends JpaRepository<Enrollment, String> {
 
     // 1. 保存选课记录（新增/更新通用）
-    public Enrollment save(Enrollment enrollment) {
-        enrollments.put(enrollment.getId(), enrollment);
-        return enrollment;
-    }
+    // 1. 保留原“保存选课记录”方法签名，JpaRepository 已默认实现（支持新增/更新）
+    @Override
+    <S extends Enrollment> S save(S entity);
 
-    // 2. 查询所有选课记录
-    public List<Enrollment> findAll() {
-        return new ArrayList<>(enrollments.values());
-    }
+    // 2. 保留原“查询所有选课记录”方法签名，JpaRepository 已默认实现
 
-    // 3. 按ID查询选课记录（用于退课）
-    public Optional<Enrollment> findById(String id) {
-        return Optional.ofNullable(enrollments.get(id));
-    }
+    @Override
+    List<Enrollment> findAll();
 
-    // 4. 按课程ID查询选课记录（用于统计课程选课人数、验证容量）
-    public List<Enrollment> findByCourseId(String courseId) {
-        return enrollments.values().stream()
-                .filter(enrollment -> enrollment.getCourseId().equals(courseId))
-                .collect(Collectors.toList());
-    }
+    // 3. 保留原“按ID查询选课记录”方法签名，JpaRepository 已默认实现
+    @Override
+    Optional<Enrollment> findById(String id);
 
-    // 5. 按学生学号查询选课记录（用于学生退课、删除学生校验）
-    public List<Enrollment> findByStudentId(String studentId) {
-        return enrollments.values().stream()
-                .filter(enrollment -> enrollment.getStudentId().equals(studentId))
-                .collect(Collectors.toList());
-    }
+    // 4. 保留原“按课程ID查询选课记录”方法，按 Spring Data 规范实现）
+    List<Enrollment> findByCourseId(String courseId);
 
-    // 6. 校验重复选课（同一学生是否已选同一课程）
-    public boolean existsByCourseIdAndStudentId(String courseId, String studentId) {
-        return enrollments.values().stream()
-                .anyMatch(enrollment -> enrollment.getCourseId().equals(courseId)
-                        && enrollment.getStudentId().equals(studentId));
-    }
+    // 5. 保留原“按学生学号查询选课记录”方法，按 Spring Data 规范实现
+    List<Enrollment> findByStudentId(String studentId);
 
-    // 7. 按ID删除选课记录（退课）
-    public void deleteById(String id) {
-        enrollments.remove(id);
-    }
+    // 6. 保留原“校验重复选课”方法，按 Spring Data 规范实现
+    boolean existsByCourseIdAndStudentId(String courseId, String studentId);
 
-    // 8. 校验学生是否有选课记录（供学生删除时使用）
-    public boolean existsByStudentId(String studentId) {
-        return !findByStudentId(studentId).isEmpty();
-    }
+     // 7. 保留原“按ID删除选课记录”方法签名，JpaRepository 已默认实现
+    @Override
+    void deleteById(String id);
+
+    // 8. 保留原“校验学生是否有选课记录”方法，按 Spring Data 规范实现
+    boolean existsByStudentId(String studentId);
+
+    // 9. 新增：按课程ID+状态组合查询
+    List<Enrollment> findByCourseIdAndStatus(String courseId, EnrollmentStatus status);
+
+    // 10. 新增：按学生ID+状态组合查询
+    List<Enrollment> findByStudentIdAndStatus(String studentId, EnrollmentStatus status);
+
+    // 11. 新增：统计某课程的活跃人数
+    long countByCourseIdAndStatus(String courseId, EnrollmentStatus status);
+
+    // 12. 新增：自定义JPQL查询某课程某状态的选课记录
+    @Query("SELECT e FROM Enrollment e WHERE e.courseId = :courseId AND e.status = :status")
+    List<Enrollment> findEnrollmentsByCourseIdAndStatus(
+            @Param("courseId") String courseId,
+            @Param("status") EnrollmentStatus status
+    );
 }
