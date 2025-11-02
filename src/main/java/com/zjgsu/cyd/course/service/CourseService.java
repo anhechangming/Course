@@ -84,8 +84,8 @@ public class CourseService {
         // 2. 检查时间冲突（改用 Repository 查数据库，非内存）
         checkTimeConflict(course, null);
 
-        // 3. 自动生成ID（保留原逻辑，若实体用 @GeneratedValue，可删除此句）
-        course.setId(UUID.randomUUID().toString().replace("-", ""));
+//        // 3. 自动生成ID（保留原逻辑，若实体用 @GeneratedValue，可删除此句）
+//        course.setId(UUID.randomUUID().toString().replace("-", ""));
 
         // 4. 保存课程（Repository 持久化到数据库）
         return courseRepository.save(course);
