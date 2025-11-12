@@ -1,0 +1,26 @@
+# application-docker.yml
+spring:
+  config:
+    activate:
+      on-profile: docker  # 新版本正确语法
+  datasource:
+    # 数据库连接信息通过环境变量注入（与 docker-compose 中的环境变量对应）
+    url: ${DB_URL}  # 对应 docker-compose 中 app 服务的 DB_URL 环境变量
+    username: ${DB_USERNAME}  # 对应 DB_USERNAME
+    password: ${DB_PASSWORD}  # 对应 DB_PASSWORD
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update  # 自动更新表结构（若表不存在则创建，已存在则更新字段）
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect  # 适配 MySQL 8
+        format_sql: true  # 格式化 SQL 日志（可选）
+    show-sql: true  # 控制台打印 SQL（开发/调试用，生产可关闭）
+  # 日志配置
+logging:
+  level:
+    root: INFO  # 根日志级别
+    org.springframework.web: INFO  # Spring Web 日志级别
+    org.hibernate: WARN  # Hibernate 日志级别（避免过多 SQL 日志干扰）
+    com.yourpackage: DEBUG  # 你的应用包日志级别（按需调整，如 com.coursehub）

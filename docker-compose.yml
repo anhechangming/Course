@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: coursehub-app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_URL: jdbc:mysql://mysql:3306/coursehub_db?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      DB_USERNAME: coursehub_user
+      DB_PASSWORD: coursehub_pass
+      TZ: Asia/Shanghai
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - coursehub-network
+
+  mysql:
+    image: mysql:8
+    container_name: coursehub-mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: coursehub_db
+      MYSQL_USER: coursehub_user
+      MYSQL_PASSWORD: coursehub_pass
+      TZ: Asia/Shanghai
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # 可选：添加初始化脚本（如果有）
+      # 挂载建表脚本（前缀加数字确保执行顺序，1 先于 2）
+      - ./schema-prod.sql:/docker-entrypoint-initdb.d/1-schema-prod.sql:ro
+      # 挂载数据插入脚本
+      - ./data-prod.sql:/docker-entrypoint-initdb.d/2-data-prod.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    networks:
+      - coursehub-network
+
+networks:
+  coursehub-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local

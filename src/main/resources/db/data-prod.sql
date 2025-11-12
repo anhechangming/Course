@@ -25,7 +25,7 @@ INSERT INTO courses (id, code, title, instructor_id, instructor_name, instructor
                      capacity, enrolled, create_time)
 VALUES
     ('4f5d6c7e-8a9b-0123-defa-4567890abcde', 'CS101', '计算机科学导论',
-     'INS001', '王教授', 'wangjiao@zjgsu.edu.cn',
+     'INS001', '程永迪', 'wangjiao@zjgsu.edu.cn',
      'MONDAY', '09:00', '11:00', 40,
      50, 0, NOW()),
     ('5f6d7c8e-9a0b-1234-efab-567890abcdef', 'MA201', '高等数学',

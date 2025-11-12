@@ -4,7 +4,7 @@
 
 -- 1. 学生表（students）
 CREATE TABLE IF NOT EXISTS students (
-                                        id VARCHAR(36) NOT NULL PRIMARY KEY,
+    id VARCHAR(36) NOT NULL PRIMARY KEY,
     student_id VARCHAR(20) NOT NULL,
     name VARCHAR(50) NOT NULL,
     major VARCHAR(50) NOT NULL,
